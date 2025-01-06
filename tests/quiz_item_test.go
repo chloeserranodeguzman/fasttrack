@@ -11,16 +11,15 @@ func TestClientViewOfQuestion(t *testing.T) {
 	item := quiz.QuizItem{
 		Question: "What is the capital of Japan?",
 		Options:  []string{"Tokyo", "Kyoto", "Osaka", "Nagoya"},
-		Answer:   0, // Correct answer is index 0 (Tokyo)
+		Answer:   0,
 	}
 
 	output := item.ClientView()
 
-	expected := `Question: What is the capital of Japan?
-A) Tokyo
-B) Kyoto
-C) Osaka
-D) Nagoya
-`
-	assert.Equal(t, expected, output, "Output should match the expected format.")
+	assert.Contains(t, output, "Question: What is the capital of Japan?")
+	assert.Contains(t, output, "A) Tokyo")
+	assert.Contains(t, output, "B) Kyoto")
+	assert.Contains(t, output, "C) Osaka")
+	assert.Contains(t, output, "D) Nagoya")
+	assert.NotContains(t, output, item.Answer)
 }

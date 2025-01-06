@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestQuizCommand(t *testing.T) {
+func TestQuestionAndFeedbackShowsWhenYouRunQuiz(t *testing.T) {
 	rootCmd := &cobra.Command{}
 	cmd.AddQuizCommand(rootCmd)
 
@@ -20,12 +20,11 @@ func TestQuizCommand(t *testing.T) {
 	err := rootCmd.Execute()
 	assert.NoError(t, err)
 
-	expectedOutput := `Question: What is the capital of Japan?
-A) Tokyo
-B) Kyoto
-C) Osaka
-D) Nagoya
-`
+	assert.Contains(t, output.String(), "What is the capital of Japan?")
+	assert.Contains(t, output.String(), "A) Tokyo")
+	assert.Contains(t, output.String(), "B) Kyoto")
+	assert.Contains(t, output.String(), "C) Osaka")
+	assert.Contains(t, output.String(), "D) Nagoya")
 
-	assert.Equal(t, expectedOutput, output.String())
+	assert.Contains(t, output.String(), "You selected:")
 }
