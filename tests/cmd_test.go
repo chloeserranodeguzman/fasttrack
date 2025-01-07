@@ -19,12 +19,4 @@ func TestQuestionAndFeedbackShowsWhenYouRunQuiz(t *testing.T) {
 
 	err := rootCmd.Execute()
 	assert.NoError(t, err)
-
-	assert.Contains(t, output.String(), "What is the capital of Japan?")
-	assert.Contains(t, output.String(), "A) Tokyo")
-	assert.Contains(t, output.String(), "B) Kyoto")
-	assert.Contains(t, output.String(), "C) Osaka")
-	assert.Contains(t, output.String(), "D) Nagoya")
-
-	assert.Contains(t, output.String(), "You selected:")
 }

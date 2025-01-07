@@ -21,11 +21,26 @@ var quizCmd = &cobra.Command{
 		fmt.Fprint(cmd.OutOrStdout(), item.ClientView())
 
 		reader := bufio.NewReader(cmd.InOrStdin())
-		fmt.Fprint(cmd.OutOrStdout(), "Enter your answer (A, B, C, D): ")
-		answer, _ := reader.ReadString('\n')
-		answer = strings.TrimSpace(answer)
+		validOptions := map[string]bool{"A": true, "B": true, "C": true, "D": true}
 
-		fmt.Fprintf(cmd.OutOrStdout(), "You selected: %s\n", answer)
+		for {
+			fmt.Fprint(cmd.OutOrStdout(), "Enter your answer (A, B, C, D): ")
+			answer, err := reader.ReadString('\n')
+
+			if err != nil {
+				fmt.Fprint(cmd.OutOrStdout(), "No input received. Exiting...\n")
+				break
+			}
+
+			answer = strings.TrimSpace(strings.ToUpper(answer))
+
+			if validOptions[answer] {
+				fmt.Fprintf(cmd.OutOrStdout(), "You selected: %s\n", answer)
+				break
+			} else {
+				fmt.Fprint(cmd.OutOrStdout(), "Invalid input. Please enter A, B, C, or D.\n")
+			}
+		}
 	},
 }
 
