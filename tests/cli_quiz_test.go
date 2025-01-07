@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldReturnSelectedAWhenUserSelectsA(t *testing.T) {
+func TestShouldReturnCorrectWhenUserSelectsA(t *testing.T) {
 	rootCmd := &cobra.Command{}
 	cmd.AddQuizCommand(rootCmd)
 
@@ -24,7 +24,23 @@ func TestShouldReturnSelectedAWhenUserSelectsA(t *testing.T) {
 
 	rootCmd.Execute()
 
-	assert.Contains(t, output.String(), "You selected: A")
+	assert.Contains(t, output.String(), "Correct!")
+}
+
+func TestShouldReturnIncorrectAndGiveTheRightAnswerWhenUserSelectsB(t *testing.T) {
+	rootCmd := &cobra.Command{}
+	cmd.AddQuizCommand(rootCmd)
+
+	userInput := bytes.NewBufferString("B\n")
+
+	output := bytes.NewBufferString("")
+	rootCmd.SetOut(output)
+	rootCmd.SetIn(userInput)
+	rootCmd.SetArgs([]string{"quiz"})
+
+	rootCmd.Execute()
+
+	assert.Contains(t, output.String(), "Incorrect. The correct answer was: Tokyo")
 }
 
 func TestShouldReturnInvalidInputAndPromptToTryAgain(t *testing.T) {
@@ -76,4 +92,23 @@ func TestShouldHaveAllQuestionsNonrepeatingWhenFourValidInputsGiven(t *testing.T
 	}
 
 	assert.Contains(t, output, "Quiz complete!")
+}
+
+func TestShouldScoreTwoWhenOnlyFirstTwoAnswersCorrect(t *testing.T) {
+	rootCmd := &cobra.Command{}
+	cmd.AddQuizCommand(rootCmd)
+
+	var stdout, stdin bytes.Buffer
+
+	stdin.WriteString("A\nB\nC\nA\n")
+
+	rootCmd.SetIn(&stdin)
+	rootCmd.SetOut(&stdout)
+	rootCmd.SetArgs([]string{"quiz"})
+
+	rootCmd.Execute()
+
+	output := stdout.String()
+
+	assert.Contains(t, output, "Your score: 2/4")
 }

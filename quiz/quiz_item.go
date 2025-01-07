@@ -6,7 +6,7 @@ type QuizItem struct {
 	Answer   int
 }
 
-func GetQuestions() []QuizItem {
+func GetQuizItems() []QuizItem {
 	return []QuizItem{
 		{
 			Question: "What is the capital of Japan?",
