@@ -12,36 +12,50 @@ import (
 var quizCmd = &cobra.Command{
 	Use:   "quiz",
 	Short: "Start a new quiz",
-	Run: func(cmd *cobra.Command, args []string) {
-		item := quiz.QuizItem{
-			Question: "What is the capital of Japan?",
-			Options:  []string{"Tokyo", "Kyoto", "Osaka", "Nagoya"},
-			Answer:   0,
+	Run:   startQuiz,
+}
+
+func startQuiz(cmd *cobra.Command, args []string) {
+	quizItems := quiz.GetQuestions()
+	reader := bufio.NewReader(cmd.InOrStdin())
+
+	for _, item := range quizItems {
+		displayQuestion(cmd, item)
+
+		answer, exit := getAnswer(cmd, reader)
+		if exit {
+			fmt.Fprint(cmd.OutOrStdout(), "Exiting quiz...\n")
+			return
 		}
-		fmt.Fprint(cmd.OutOrStdout(), item.ClientView())
+		fmt.Fprintf(cmd.OutOrStdout(), "You selected: %s\n\n", answer)
+	}
 
-		reader := bufio.NewReader(cmd.InOrStdin())
-		validOptions := map[string]bool{"A": true, "B": true, "C": true, "D": true}
+	fmt.Fprint(cmd.OutOrStdout(), "Quiz complete!\n")
+}
 
-		for {
-			fmt.Fprint(cmd.OutOrStdout(), "Enter your answer (A, B, C, D): ")
-			answer, err := reader.ReadString('\n')
+func displayQuestion(cmd *cobra.Command, item quiz.QuizItem) {
+	fmt.Fprint(cmd.OutOrStdout(), item.ClientView())
+}
 
-			if err != nil {
-				fmt.Fprint(cmd.OutOrStdout(), "No input received. Exiting...\n")
-				break
-			}
+func getAnswer(cmd *cobra.Command, reader *bufio.Reader) (string, bool) {
+	validOptions := map[string]bool{"A": true, "B": true, "C": true, "D": true}
 
-			answer = strings.TrimSpace(strings.ToUpper(answer))
+	for {
+		fmt.Fprint(cmd.OutOrStdout(), "Enter your answer (A, B, C, D): ")
+		answer, err := reader.ReadString('\n')
 
-			if validOptions[answer] {
-				fmt.Fprintf(cmd.OutOrStdout(), "You selected: %s\n", answer)
-				break
-			} else {
-				fmt.Fprint(cmd.OutOrStdout(), "Invalid input. Please enter A, B, C, or D.\n")
-			}
+		if err != nil {
+			return "", true
 		}
-	},
+
+		answer = strings.TrimSpace(strings.ToUpper(answer))
+
+		if validOptions[answer] {
+			return answer, false
+		}
+
+		fmt.Fprint(cmd.OutOrStdout(), "Invalid input. Please enter A, B, C, or D.\n")
+	}
 }
 
 func AddQuizCommand(root *cobra.Command) {
