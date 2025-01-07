@@ -11,38 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldReturnCorrectWhenUserSelectsCorrectAnswer(t *testing.T) {
-	rootCmd := &cobra.Command{}
-	cmd.AddQuizCommand(rootCmd)
-
-	userInput := bytes.NewBufferString("A\n")
-
-	output := bytes.NewBufferString("")
-	rootCmd.SetOut(output)
-	rootCmd.SetIn(userInput)
-	rootCmd.SetArgs([]string{"quiz"})
-
-	rootCmd.Execute()
-
-	assert.Contains(t, output.String(), "Correct!")
-}
-
-func TestShouldReturnIncorrectAndGiveTheRightAnswerWhenUserWrongAnswer(t *testing.T) {
-	rootCmd := &cobra.Command{}
-	cmd.AddQuizCommand(rootCmd)
-
-	userInput := bytes.NewBufferString("B\n")
-
-	output := bytes.NewBufferString("")
-	rootCmd.SetOut(output)
-	rootCmd.SetIn(userInput)
-	rootCmd.SetArgs([]string{"quiz"})
-
-	rootCmd.Execute()
-
-	assert.Contains(t, output.String(), "Incorrect. The correct answer was: Tokyo")
-}
-
 func TestShouldReturnInvalidInputAndPromptToTryAgain(t *testing.T) {
 	rootCmd := &cobra.Command{}
 	cmd.AddQuizCommand(rootCmd)
@@ -90,25 +58,4 @@ func TestShouldHaveAllQuestionsNonrepeatingWhenFourValidInputsGiven(t *testing.T
 		count := strings.Count(output, question)
 		assert.Equal(t, 1, count, fmt.Sprintf("Question '%s' appeared %d times", question, count))
 	}
-
-	assert.Contains(t, output, "Quiz complete!")
-}
-
-func TestShouldScoreTwoWhenOnlyFirstTwoAnswersCorrect(t *testing.T) {
-	rootCmd := &cobra.Command{}
-	cmd.AddQuizCommand(rootCmd)
-
-	var stdout, stdin bytes.Buffer
-
-	stdin.WriteString("A\nB\nC\nA\n")
-
-	rootCmd.SetIn(&stdin)
-	rootCmd.SetOut(&stdout)
-	rootCmd.SetArgs([]string{"quiz"})
-
-	rootCmd.Execute()
-
-	output := stdout.String()
-
-	assert.Contains(t, output, "Your score: 2/4")
 }

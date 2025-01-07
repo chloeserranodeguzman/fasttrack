@@ -47,7 +47,7 @@ go run main.go quiz
 ---
 
 ## Testing
-- cli_quiz_test: Focus only on testing user input and interaction.
+- client_test: Focus only on testing user input and interaction.
 - cmd_test: Focus only on the command working. i.e. ```go run main.go quiz```
 - quiz_item_test: Focus only on that the answer is hidden from the user and formatting.
 - scorer_test: Focus only on calculating percentile ranking and number of correct answers.

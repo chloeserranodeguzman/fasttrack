@@ -1,37 +1,71 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/chloeserranodeguzman/fasttrack/quiz"
 	"github.com/spf13/cobra"
 )
 
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Start the API server to serve quiz questions",
-	Long:  `Start a simple HTTP server that serves quiz questions and handles quiz submissions.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		mux := SetupRouter()
 		fmt.Println("Starting API server on port 8080...")
-
-		http.HandleFunc("/questions", handleQuestions)
-
-		err := http.ListenAndServe(":8080", nil)
+		err := http.ListenAndServe(":8080", mux)
 		if err != nil {
 			fmt.Printf("Failed to start server: %v\n", err)
 		}
 	},
 }
 
-func AddServeCommand(root *cobra.Command) {
-	root.AddCommand(serveCmd)
+func SetupRouter() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/questions", handleQuestions)
+	mux.HandleFunc("/answers", handleAnswers)
+	return mux
 }
 
-// temporary
 func handleQuestions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`[
-		{"id": 1, "text": "What is the capital of Japan?", "options": ["Tokyo", "Kyoto", "Osaka", "Nagoya"]},
-		{"id": 2, "text": "What is 2 + 2?", "options": ["3", "4", "5", "6"]}
-	]`))
+	quiz := quiz.GetQuizItems()
+	json.NewEncoder(w).Encode(quiz)
+}
+
+func handleAnswers(w http.ResponseWriter, r *http.Request) {
+	var submission struct {
+		Answers []int `json:"answers"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&submission)
+
+	if err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	quizItems := quiz.GetQuizItems()
+	scorer := &quiz.Scorer{}
+
+	for i, answer := range submission.Answers {
+		if i < len(quizItems) {
+			scorer.Evaluate(answer, quizItems[i].Answer)
+		}
+	}
+
+	result := map[string]interface{}{
+		"message": scorer.GetScore(),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func AddServeCommand(root *cobra.Command) {
+	root.AddCommand(serveCmd)
 }
