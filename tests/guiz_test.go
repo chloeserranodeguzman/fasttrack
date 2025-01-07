@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestShouldReturnCorrectWhenUserSelectsA(t *testing.T) {
+func TestShouldReturnCorrectWhenUserSelectsCorrectAnswer(t *testing.T) {
 	rootCmd := &cobra.Command{}
 	cmd.AddQuizCommand(rootCmd)
 
@@ -27,7 +27,7 @@ func TestShouldReturnCorrectWhenUserSelectsA(t *testing.T) {
 	assert.Contains(t, output.String(), "Correct!")
 }
 
-func TestShouldReturnIncorrectAndGiveTheRightAnswerWhenUserSelectsB(t *testing.T) {
+func TestShouldReturnIncorrectAndGiveTheRightAnswerWhenUserWrongAnswer(t *testing.T) {
 	rootCmd := &cobra.Command{}
 	cmd.AddQuizCommand(rootCmd)
 
