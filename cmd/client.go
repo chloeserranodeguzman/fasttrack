@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 
@@ -13,61 +12,76 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Define the quiz command using StartQuiz
 var quizCmd = &cobra.Command{
 	Use:   "quiz",
 	Short: "Start a new quiz",
-	Run:   startQuiz,
+	Run:   StartQuiz,
 }
 
 var HttpGet = http.Get
 var HttpPost = http.Post
 
-func startQuiz(cmd *cobra.Command, args []string) {
+func StartQuiz(cmd *cobra.Command, args []string) {
+	quizHelper := quiz.NewQuizHelper()
+
+	quizItems := getQuestionsFromServer()
+	userAnswers := getAnswersFromUser(cmd, quizItems, quizHelper)
+	results := getResultsFromServer(userAnswers)
+	printResults(results)
+}
+
+func getQuestionsFromServer() []quiz.QuizItem {
 	resp, err := HttpGet("http://localhost:8080/questions")
 	if err != nil {
 		fmt.Println("Failed to fetch questions from server:", err)
-		return
+		return nil
 	}
 	defer resp.Body.Close()
 
 	var quizItems []quiz.QuizItem
 	json.NewDecoder(resp.Body).Decode(&quizItems)
+	return quizItems
+}
 
+func getAnswersFromUser(cmd *cobra.Command, quizItems []quiz.QuizItem, quizHelper *quiz.QuizHelper) []int {
 	reader := bufio.NewReader(cmd.InOrStdin())
 	var userAnswers []int
 
 	for _, item := range quizItems {
 		displayQuestion(cmd, item)
 
-		answer, exit := getAnswer(cmd, reader)
+		answer, exit := getAnswer(cmd, reader, quizHelper)
 		if exit {
 			fmt.Fprint(cmd.OutOrStdout(), "Exiting quiz...\n")
-			return
+			return nil
 		}
 
-		userAnswerIndex := map[string]int{"A": 0, "B": 1, "C": 2, "D": 3}[answer]
+		userAnswerIndex := quizHelper.GetAnswerIndex(answer)
 		userAnswers = append(userAnswers, userAnswerIndex)
 	}
-
-	sendAnswersToServer(userAnswers)
+	return userAnswers
 }
 
-func sendAnswersToServer(answers []int) {
+func getResultsFromServer(answers []int) map[string]interface{} {
 	payload, _ := json.Marshal(map[string]interface{}{"answers": answers})
 	resp, err := HttpPost("http://localhost:8080/answers", "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		fmt.Println("Failed to submit answers:", err)
-		return
+		return nil
 	}
 	defer resp.Body.Close()
 
-	getQuizResults(resp.Body)
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+	return result
 }
 
-func getQuizResults(body io.Reader) {
-	var result map[string]interface{}
-	json.NewDecoder(body).Decode(&result)
-
+func printResults(result map[string]interface{}) {
+	if result == nil {
+		fmt.Println("No results to display.")
+		return
+	}
 	fmt.Printf("\nQuiz complete!\n%s\n", result["message"])
 }
 
@@ -75,9 +89,7 @@ func displayQuestion(cmd *cobra.Command, item quiz.QuizItem) {
 	fmt.Fprint(cmd.OutOrStdout(), item.ClientView())
 }
 
-func getAnswer(cmd *cobra.Command, reader *bufio.Reader) (string, bool) {
-	validOptions := map[string]bool{"A": true, "B": true, "C": true, "D": true}
-
+func getAnswer(cmd *cobra.Command, reader *bufio.Reader, quizHelper *quiz.QuizHelper) (string, bool) {
 	for {
 		fmt.Fprint(cmd.OutOrStdout(), "Enter your answer (A, B, C, D): ")
 		answer, err := reader.ReadString('\n')
@@ -87,7 +99,7 @@ func getAnswer(cmd *cobra.Command, reader *bufio.Reader) (string, bool) {
 		}
 
 		answer = strings.TrimSpace(strings.ToUpper(answer))
-		if validOptions[answer] {
+		if quizHelper.IsValidAnswer(answer) {
 			return answer, false
 		}
 

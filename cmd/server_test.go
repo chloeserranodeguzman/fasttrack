@@ -1,4 +1,4 @@
-package tests
+package cmd
 
 import (
 	"bytes"
@@ -8,12 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/chloeserranodeguzman/fasttrack/cmd"
 	"github.com/stretchr/testify/assert"
 )
 
 func setupTestServer() *httptest.Server {
-	mux := cmd.SetupRouter()
+	mux := SetupRouter()
 	return httptest.NewServer(mux)
 }
 

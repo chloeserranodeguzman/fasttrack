@@ -1,4 +1,4 @@
-package tests
+package cmd
 
 import (
 	"bytes"
@@ -6,14 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/chloeserranodeguzman/fasttrack/cmd"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestShouldReturnInvalidInputAndPromptToTryAgain(t *testing.T) {
 	rootCmd := &cobra.Command{}
-	cmd.AddQuizCommand(rootCmd)
+	AddQuizCommand(rootCmd)
 
 	userInput := bytes.NewBufferString("X\n")
 	output := bytes.NewBufferString("")
@@ -33,7 +32,7 @@ func TestShouldReturnInvalidInputAndPromptToTryAgain(t *testing.T) {
 
 func TestShouldHaveAllQuestionsNonrepeatingWhenFourValidInputsGiven(t *testing.T) {
 	rootCmd := &cobra.Command{}
-	cmd.AddQuizCommand(rootCmd)
+	AddQuizCommand(rootCmd)
 
 	var stdout, stdin bytes.Buffer
 

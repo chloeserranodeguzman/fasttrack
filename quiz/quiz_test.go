@@ -1,14 +1,13 @@
-package tests
+package quiz
 
 import (
 	"testing"
 
-	"github.com/chloeserranodeguzman/fasttrack/quiz"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestClientViewOfQuestion(t *testing.T) {
-	item := quiz.QuizItem{
+	item := QuizItem{
 		Question: "What is the capital of Japan?",
 		Options:  []string{"Tokyo", "Kyoto", "Osaka", "Nagoya"},
 		Answer:   0,

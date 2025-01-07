@@ -24,18 +24,18 @@ var serveCmd = &cobra.Command{
 
 func SetupRouter() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/questions", handleQuestions)
-	mux.HandleFunc("/answers", handleAnswers)
+	mux.HandleFunc("/questions", getQuestions)
+	mux.HandleFunc("/answers", evaluateAnswers)
 	return mux
 }
 
-func handleQuestions(w http.ResponseWriter, r *http.Request) {
+func getQuestions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	quiz := quiz.GetQuizItems()
 	json.NewEncoder(w).Encode(quiz)
 }
 
-func handleAnswers(w http.ResponseWriter, r *http.Request) {
+func evaluateAnswers(w http.ResponseWriter, r *http.Request) {
 	var submission struct {
 		Answers []int `json:"answers"`
 	}

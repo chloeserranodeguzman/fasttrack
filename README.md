@@ -44,6 +44,11 @@ go run main.go serve
 go run main.go quiz
 ```
 
+- Run All Tests
+```
+go test ./...
+```
+
 ---
 
 ## Testing

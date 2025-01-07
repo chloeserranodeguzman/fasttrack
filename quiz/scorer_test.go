@@ -1,14 +1,13 @@
-package tests
+package quiz
 
 import (
 	"testing"
 
-	"github.com/chloeserranodeguzman/fasttrack/quiz"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestScore(t *testing.T) {
-	scorer := &quiz.Scorer{}
+	scorer := &Scorer{}
 
 	scorer.Evaluate(0, 0)
 	scorer.Evaluate(1, 1)
@@ -20,9 +19,9 @@ func TestScore(t *testing.T) {
 }
 
 func TestShouldScoreFiftyPercentWithPreviousScores(t *testing.T) {
-	scorer := &quiz.Scorer{}
+	scorer := &Scorer{}
 
-	quiz.ScoreStore = []int{1, 1, 2, 2, 2, 3, 3, 3, 4, 4}
+	ScoreStore = []int{1, 1, 2, 2, 2, 3, 3, 3, 4, 4}
 
 	scorer.Evaluate(0, 0)
 	scorer.Evaluate(1, 1)
@@ -34,9 +33,9 @@ func TestShouldScoreFiftyPercentWithPreviousScores(t *testing.T) {
 }
 
 func TestShouldScoreZeroPercentWithPreviousScores(t *testing.T) {
-	scorer := &quiz.Scorer{}
+	scorer := &Scorer{}
 
-	quiz.ScoreStore = []int{1, 1, 2, 2, 2, 3, 3, 3, 4, 4}
+	ScoreStore = []int{1, 1, 2, 2, 2, 3, 3, 3, 4, 4}
 
 	scorer.Evaluate(0, 2)
 	scorer.Evaluate(1, 0)
@@ -48,9 +47,9 @@ func TestShouldScoreZeroPercentWithPreviousScores(t *testing.T) {
 }
 
 func TestShouldScoreOneHundredPercentWithPreviousScores(t *testing.T) {
-	scorer := &quiz.Scorer{}
+	scorer := &Scorer{}
 
-	quiz.ScoreStore = []int{1, 1, 2, 2, 2, 3, 3, 3, 3, 3}
+	ScoreStore = []int{1, 1, 2, 2, 2, 3, 3, 3, 3, 3}
 
 	scorer.Evaluate(0, 0)
 	scorer.Evaluate(1, 1)
@@ -62,9 +61,9 @@ func TestShouldScoreOneHundredPercentWithPreviousScores(t *testing.T) {
 }
 
 func TestShouldScoreOneHundredPercentWithNoPreviousScores(t *testing.T) {
-	scorer := &quiz.Scorer{}
+	scorer := &Scorer{}
 
-	quiz.ScoreStore = []int{}
+	ScoreStore = []int{}
 
 	scorer.Evaluate(0, 0)
 	scorer.Evaluate(1, 1)
