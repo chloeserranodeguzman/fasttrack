@@ -55,13 +55,13 @@ func getAnswer(cmd *cobra.Command, reader *bufio.Reader) (string, bool) {
 		answer, err := reader.ReadString('\n')
 
 		if err != nil {
-			return "", true // Exit signal
+			return "", true
 		}
 
 		answer = strings.TrimSpace(strings.ToUpper(answer))
 
 		if validOptions[answer] {
-			return answer, false // Return answer and continue
+			return answer, false
 		}
 
 		fmt.Fprint(cmd.OutOrStdout(), "Invalid input. Please enter A, B, C, or D.\n")

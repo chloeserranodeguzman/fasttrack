@@ -5,10 +5,11 @@ import (
 	"sort"
 )
 
+var ScoreStore []int
+
 type Scorer struct {
 	CorrectAnswers int
 	TotalQuestions int
-	PreviousScores []int
 }
 
 func (s *Scorer) Evaluate(selectedOption int, correctOption int) {
@@ -18,29 +19,27 @@ func (s *Scorer) Evaluate(selectedOption int, correctOption int) {
 	}
 }
 
-func (s *Scorer) SetPreviousScores(scores []int) {
-	s.PreviousScores = scores
-}
-
 func (s *Scorer) CalculatePercentile() int {
-	if len(s.PreviousScores) == 0 {
-		return 100 // If no previous scores, user is the best by default
+	if len(ScoreStore) == 0 {
+		return 100
 	}
 
 	userScore := s.CorrectAnswers
 
-	sort.Ints(s.PreviousScores)
+	sortedScores := append([]int{}, ScoreStore...)
+	sort.Ints(sortedScores)
 
 	count := 0
-	for _, score := range s.PreviousScores {
+	for _, score := range sortedScores {
 		if score < userScore {
 			count++
 		}
 	}
 
-	percentile := int(float64(count) / float64(len(s.PreviousScores)) * 100)
-	s.PreviousScores = append(s.PreviousScores, userScore)
-	sort.Ints(s.PreviousScores)
+	percentile := int(float64(count) / float64(len(sortedScores)) * 100)
+
+	ScoreStore = append(ScoreStore, userScore)
+	sort.Ints(ScoreStore)
 
 	return percentile
 }
