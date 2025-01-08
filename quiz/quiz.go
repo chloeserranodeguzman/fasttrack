@@ -31,11 +31,24 @@ func GetQuizItems() []QuizItem {
 	}
 }
 
-func (q QuizItem) ClientView() string {
+func (q QuizItem) GetQuizItemWithoutAnswers() string {
 	optionLabels := []string{"A", "B", "C", "D"}
 	view := "Question: " + q.Question + "\n"
 	for i, option := range q.Options {
 		view += optionLabels[i] + ") " + option + "\n"
 	}
 	return view
+}
+
+func GetQuizWithoutAnswers() []map[string]interface{} {
+	quizItems := GetQuizItems()
+	publicItems := make([]map[string]interface{}, len(quizItems))
+
+	for i, item := range quizItems {
+		publicItems[i] = map[string]interface{}{
+			"question": item.Question,
+			"options":  item.Options,
+		}
+	}
+	return publicItems
 }

@@ -15,5 +15,5 @@ func Execute() {
 
 func init() {
 	AddQuizCommand(rootCmd)
-	AddServeCommand(rootCmd)
+	AddServerCommand(rootCmd)
 }

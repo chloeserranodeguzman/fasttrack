@@ -15,7 +15,7 @@ func NewQuizHelper() *QuizHelper {
 func (qh *QuizHelper) GetAnswerIndex(answer string) int {
 	index, exists := qh.answerMap[answer]
 	if !exists {
-		return -1 // Return -1 for invalid answers
+		return -1
 	}
 	return index
 }

@@ -12,6 +12,16 @@ type Scorer struct {
 	TotalQuestions int
 }
 
+func (s *Scorer) EvaluateAnswers(answers []int) {
+	quizItems := GetQuizItems()
+
+	for i, answer := range answers {
+		if i < len(quizItems) {
+			s.Evaluate(answer, quizItems[i].Answer)
+		}
+	}
+}
+
 func (s *Scorer) Evaluate(selectedOption int, correctOption int) {
 	s.TotalQuestions++
 	if selectedOption == correctOption {

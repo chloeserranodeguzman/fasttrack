@@ -65,8 +65,8 @@ func TestShouldScoreOneHundredPercentWithNoPreviousScores(t *testing.T) {
 
 	ScoreStore = []int{}
 
-	scorer.Evaluate(0, 0)
-	scorer.Evaluate(1, 1)
+	scorer.Evaluate(0, 1)
+	scorer.Evaluate(1, 0)
 	scorer.Evaluate(2, 2)
 	scorer.Evaluate(1, 1)
 

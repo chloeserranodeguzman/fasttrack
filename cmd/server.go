@@ -10,7 +10,7 @@ import (
 )
 
 var serveCmd = &cobra.Command{
-	Use:   "serve",
+	Use:   "server",
 	Short: "Start the API server to serve quiz questions",
 	Run: func(cmd *cobra.Command, args []string) {
 		mux := SetupRouter()
@@ -31,7 +31,7 @@ func SetupRouter() *http.ServeMux {
 
 func getQuestions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	quiz := quiz.GetQuizItems()
+	quiz := quiz.GetQuizWithoutAnswers()
 	json.NewEncoder(w).Encode(quiz)
 }
 
@@ -49,14 +49,8 @@ func evaluateAnswers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	quizItems := quiz.GetQuizItems()
 	scorer := &quiz.Scorer{}
-
-	for i, answer := range submission.Answers {
-		if i < len(quizItems) {
-			scorer.Evaluate(answer, quizItems[i].Answer)
-		}
-	}
+	scorer.EvaluateAnswers(submission.Answers)
 
 	result := map[string]interface{}{
 		"message": scorer.GetScore(),
@@ -66,6 +60,6 @@ func evaluateAnswers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
-func AddServeCommand(root *cobra.Command) {
+func AddServerCommand(root *cobra.Command) {
 	root.AddCommand(serveCmd)
 }
