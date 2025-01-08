@@ -13,23 +13,23 @@ type Scorer struct {
 }
 
 func (s *Scorer) EvaluateAnswers(answers []int) {
-	quizItems := GetQuizItems()
+	quizItems := getQuizItems()
 
 	for i, answer := range answers {
 		if i < len(quizItems) {
-			s.Evaluate(answer, quizItems[i].Answer)
+			s.evaluate(answer, quizItems[i].Answer)
 		}
 	}
 }
 
-func (s *Scorer) Evaluate(selectedOption int, correctOption int) {
+func (s *Scorer) evaluate(selectedOption int, correctOption int) {
 	s.TotalQuestions++
 	if selectedOption == correctOption {
 		s.CorrectAnswers++
 	}
 }
 
-func (s *Scorer) CalculatePercentile() int {
+func (s *Scorer) calculatePercentile() int {
 	if len(ScoreStore) == 0 {
 		return 100
 	}
@@ -55,7 +55,7 @@ func (s *Scorer) CalculatePercentile() int {
 }
 
 func (s Scorer) GetScore() string {
-	percentile := s.CalculatePercentile()
+	percentile := s.calculatePercentile()
 	return fmt.Sprintf("Your score: %d/%d\nYou were better than %d%% of all quizzers.\n",
 		s.CorrectAnswers, s.TotalQuestions, percentile)
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
@@ -15,46 +16,62 @@ import (
 )
 
 func TestShouldReturnInvalidInputAndPromptToTryAgain(t *testing.T) {
-	rootCmd := &cobra.Command{}
-	AddQuizCommand(rootCmd)
+	server := mockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`[{"Question":"What is 2+2?","Options":["1","2","3","4"]}]`))
+	})
 
-	userInput := bytes.NewBufferString("X\n")
+	httpGet = func(url string) (*http.Response, error) {
+		return http.Get(server.URL + "/questions")
+	}
+
+	cmd := &cobra.Command{}
 	output := bytes.NewBufferString("")
+	input := bytes.NewBufferString("X\n")
 
-	rootCmd.SetOut(output)
-	rootCmd.SetIn(userInput)
-	rootCmd.SetArgs([]string{"quiz"})
+	cmd.SetOut(output)
+	cmd.SetIn(input)
 
-	rootCmd.Execute()
+	StartQuiz(cmd, nil)
 
 	assert.Contains(t, output.String(), "Invalid input. Please enter A, B, C, or D.")
-
 	promptCount := strings.Count(output.String(), "Enter your answer (A, B, C, D):")
-
 	assert.Equal(t, 2, promptCount, "Prompt should appear twice")
 }
 
-func TestShouldHaveAllQuestionsNonrepeatingWhenFourValidInputsGiven(t *testing.T) {
-	rootCmd := &cobra.Command{}
-	AddQuizCommand(rootCmd)
+func TestShouldHaveAllQuestionsNonrepeatingWhenTwoValidInputsGiven(t *testing.T) {
+	server := mockServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/questions" {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`[{"Question":"What is 2+2?","Options":["1","2","3","4"]},
+	                        {"Question":"What is the capital of Japan?","Options":["Tokyo","Osaka","Kyoto","Nagoya"]}]`))
+		} else if r.URL.Path == "/answers" {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{"message":"You scored 2/2"}`))
+		}
+	})
 
+	httpGet = func(url string) (*http.Response, error) {
+		return http.Get(server.URL + "/questions")
+	}
+
+	httpPost = func(url, contentType string, body io.Reader) (*http.Response, error) {
+		return http.Post(server.URL+"/answers", contentType, body)
+	}
+
+	cmd := &cobra.Command{}
 	var stdout, stdin bytes.Buffer
+	stdin.WriteString("A\nB\n")
 
-	stdin.WriteString("A\nB\nB\nB\n")
+	cmd.SetIn(&stdin)
+	cmd.SetOut(&stdout)
 
-	rootCmd.SetIn(&stdin)
-	rootCmd.SetOut(&stdout)
-	rootCmd.SetArgs([]string{"quiz"})
-
-	rootCmd.Execute()
+	StartQuiz(cmd, nil)
 
 	output := stdout.String()
-
 	expectedQuestions := []string{
 		"What is the capital of Japan?",
-		"What is 2 + 2?",
-		"Which planet is known as the Red Planet?",
-		"Who wrote 'Hamlet'?",
+		"What is 2+2?",
 	}
 
 	for _, question := range expectedQuestions {
@@ -69,7 +86,7 @@ func TestGetQuestionsFromServerShouldSucceed(t *testing.T) {
 	httpGet = func(url string) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: 200,
-			Body:       io.NopCloser(bytes.NewBufferString(mockResponse)), // Use io.NopCloser
+			Body:       io.NopCloser(bytes.NewBufferString(mockResponse)),
 		}, nil
 	}
 
@@ -125,6 +142,12 @@ func TestPrintResultsShouldSucceed(t *testing.T) {
 		printResults(result)
 	})
 	assert.Contains(t, output, "Quiz complete!")
+}
+
+func mockServer(t *testing.T, handlerFunc http.HandlerFunc) *httptest.Server {
+	server := httptest.NewServer(handlerFunc)
+	t.Cleanup(func() { server.Close() })
+	return server
 }
 
 func captureStdout(f func()) string {

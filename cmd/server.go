@@ -13,7 +13,7 @@ var serveCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start the API server to serve quiz questions",
 	Run: func(cmd *cobra.Command, args []string) {
-		mux := SetupRouter()
+		mux := setupRouter()
 		fmt.Println("Starting API server on port 8080...")
 		err := http.ListenAndServe(":8080", mux)
 		if err != nil {
@@ -22,7 +22,7 @@ var serveCmd = &cobra.Command{
 	},
 }
 
-func SetupRouter() *http.ServeMux {
+func setupRouter() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/questions", getQuestions)
 	mux.HandleFunc("/answers", evaluateAnswers)

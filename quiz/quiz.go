@@ -6,7 +6,7 @@ type QuizItem struct {
 	Answer   int
 }
 
-func GetQuizItems() []QuizItem {
+func getQuizItems() []QuizItem {
 	return []QuizItem{
 		{
 			Question: "What is the capital of Japan?",
@@ -41,7 +41,7 @@ func (q QuizItem) GetQuizItemWithoutAnswers() string {
 }
 
 func GetQuizWithoutAnswers() []map[string]interface{} {
-	quizItems := GetQuizItems()
+	quizItems := getQuizItems()
 	publicItems := make([]map[string]interface{}, len(quizItems))
 
 	for i, item := range quizItems {

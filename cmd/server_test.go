@@ -54,7 +54,7 @@ func TestGetQuestionsShouldHaveQuestionAndOptions(t *testing.T) {
 }
 
 func setupTestServer() *httptest.Server {
-	mux := SetupRouter()
+	mux := setupRouter()
 	return httptest.NewServer(mux)
 }
 
